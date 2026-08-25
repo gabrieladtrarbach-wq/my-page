@@ -1,366 +1,486 @@
 <!DOCTYPE html>
+
 <html lang="pt-BR">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Calculadora de IMC com Histórico Retrátil</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      font-family: Arial, Helvetica, sans-serif;
-    }
-    body {
-      background-color: #f4f6f9;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      margin: 0;
-      padding: 20px;
-    }
-    .container {
-      background: #fff;
-      padding: 25px;
-      border-radius: 10px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-      width: 100%;
-      max-width: 450px;
-      position: relative;
-    }
-    .header-actions {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-    h1 {
-      margin: 0;
-      font-size: 22px;
-      color: #333;
-    }
-    .btn-toggle-history {
-      background: #007bff;
-      color: white;
-      border: none;
-      padding: 8px 12px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: bold;
-      transition: background 0.2s;
-    }
-    .btn-toggle-history:hover {
-      background: #0056b3;
-    }
-    .form-group {
-      margin-bottom: 15px;
-    }
-    label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: bold;
-      color: #555;
-    }
-    input {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      font-size: 16px;
-    }
-    .btn-calc {
-      width: 100%;
-      padding: 12px;
-      background-color: #28a745;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      font-size: 16px;
-      cursor: pointer;
-      font-weight: bold;
-      margin-top: 10px;
-      transition: background 0.2s;
-    }
-    .btn-calc:hover {
-      background-color: #218838;
-    }
-    .result {
-      margin-top: 20px;
-      padding: 15px;
-      border-radius: 5px;
-      text-align: center;
-      font-size: 18px;
-      font-weight: bold;
-      display: none;
-    }
 
-    /* Cores de status */
-    .abaixo { background-color: #ffeeba; color: #856404; }
-    .normal { background-color: #d4edda; color: #155724; }
-    .sobrepeso { background-color: #fff3cd; color: #856404; }
-    .obesidade { background-color: #f8d7da; color: #721c24; }
+    <meta charset="UTF-8">
 
-    /* Fundo escuro quando a aba abre */
-    .overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0, 0, 0, 0.4);
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.3s ease;
-      z-index: 99;
-    }
-    .overlay.active {
-      opacity: 1;
-      visibility: visible;
-    }
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    /* Painel Retrátil (Drawer) */
-    .drawer {
-      position: fixed;
-      top: 0;
-      right: -360px; /* Escondido fora da tela */
-      width: 350px;
-      max-width: 85vw;
-      height: 100vh;
-      background: #fff;
-      box-shadow: -4px 0 15px rgba(0,0,0,0.15);
-      z-index: 100;
-      display: flex;
-      flex-direction: column;
-      transition: right 0.3s ease-in-out;
-    }
-    .drawer.open {
-      right: 0; /* Desliza para dentro da tela */
-    }
-    .drawer-header {
-      padding: 20px;
-      background: #f8f9fa;
-      border-bottom: 1px solid #ddd;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .drawer-header h2 {
-      margin: 0;
-      font-size: 18px;
-      color: #333;
-    }
-    .btn-close {
-      background: none;
-      border: none;
-      font-size: 24px;
-      cursor: pointer;
-      color: #666;
-    }
-    .drawer-body {
-      padding: 15px;
-      flex: 1;
-      overflow-y: auto;
-    }
-    .drawer-footer {
-      padding: 15px;
-      border-top: 1px solid #ddd;
-      background: #f8f9fa;
-    }
-    .btn-clear {
-      width: 100%;
-      padding: 10px;
-      background-color: #dc3545;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      font-size: 14px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    .btn-clear:hover {
-      background-color: #c82333;
-    }
+    <title>Meu Portfólio / Perfil</title>
 
-    /* Lista do Histórico */
-    ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-    li {
-      background: #f8f9fa;
-      border: 1px solid #e9ecef;
-      border-radius: 5px;
-      padding: 12px;
-      margin-bottom: 10px;
-      display: flex;
-      justify-content: space-between;
-      font-size: 14px;
-    }
-  </style>
+    
+
+    <style>
+
+        /* =========================================================
+
+           VARIÁVEIS DE CORES E ESTILOS GERAIS
+
+           (Dica para os alunos: alterem as cores aqui!)
+
+        ========================================================= */
+
+        :root {
+
+            --cor-primaria: #2563eb;       /* Cor de destaque/botões */
+
+            --cor-primaria-hover: #1d4ed8; /* Cor ao passar o mouse */
+
+            --cor-fundo: #f8fafc;          /* Cor de fundo da página */
+
+            --cor-card: #ffffff;           /* Fundo dos cartões */
+
+            --cor-texto: #1e293b;          /* Cor do texto principal */
+
+            --cor-texto-suave: #64748b;    /* Cor de textos secundários */
+
+            --borda: #e2e8f0;              /* Linhas de divisão */
+
+        }
+
+
+        * {
+
+            margin: 0;
+
+            padding: 0;
+
+            box-sizing: border-box;
+
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+        }
+
+
+        body {
+
+            background-color: var(--cor-fundo);
+
+            color: var(--cor-texto);
+
+            line-height: 1.6;
+
+            display: flex;
+
+            flex-direction: column;
+
+            min-height: 100vh;
+
+        }
+
+
+        /* =========================================================
+
+           CABEÇALHO E MENU DE NAVEGAÇÃO
+
+        ========================================================= */
+
+        header {
+
+            background-color: var(--cor-card);
+
+            border-bottom: 1px solid var(--borda);
+
+            position: sticky;
+
+            top: 0;
+
+            z-index: 1000;
+
+        }
+
+
+        .navbar {
+
+            max-width: 900px;
+
+            margin: 0 auto;
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            padding: 1rem 1.5rem;
+
+        }
+
+
+        .nav-logo {
+
+            font-weight: 700;
+
+            font-size: 1.25rem;
+
+            color: var(--cor-primaria);
+
+            text-decoration: none;
+
+        }
+
+
+        .nav-links {
+
+            display: flex;
+
+            list-style: none;
+
+            gap: 1.5rem;
+
+        }
+
+
+        .nav-links a {
+
+            text-decoration: none;
+
+            color: var(--cor-texto);
+
+            font-weight: 500;
+
+            transition: color 0.2s;
+
+        }
+
+
+        .nav-links a:hover,
+
+        .nav-links a.active {
+
+            color: var(--cor-primaria);
+
+        }
+
+
+        /* =========================================================
+
+           CONTEÚDO PRINCIPAL
+
+        ========================================================= */
+
+        main {
+
+            flex: 1;
+
+            max-width: 900px;
+
+            width: 100%;
+
+            margin: 2rem auto;
+
+            padding: 0 1.5rem;
+
+        }
+
+
+        .profile-card {
+
+            background-color: var(--cor-card);
+
+            border-radius: 12px;
+
+            border: 1px solid var(--borda);
+
+            padding: 2.5rem;
+
+            text-align: center;
+
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+
+        }
+
+
+        /* Container da Imagem de Perfil */
+
+        .profile-image-container {
+
+            width: 160px;
+
+            height: 160px;
+
+            margin: 0 auto 1.5rem auto;
+
+            border-radius: 50%;
+
+            overflow: hidden;
+
+            border: 4px solid var(--cor-primaria);
+
+            background-color: var(--borda);
+
+        }
+
+
+        .profile-image {
+
+            width: 100%;
+
+            height: 100%;
+
+            object-fit: cover;
+
+            display: block;
+
+        }
+
+
+        .student-name {
+
+            font-size: 2rem;
+
+            font-weight: 700;
+
+            margin-bottom: 0.25rem;
+
+        }
+
+
+        .student-role {
+
+            color: var(--cor-primaria);
+
+            font-weight: 600;
+
+            font-size: 1.1rem;
+
+            margin-bottom: 1.5rem;
+
+        }
+
+
+        .student-bio {
+
+            color: var(--cor-texto-suave);
+
+            max-width: 600px;
+
+            margin: 0 auto 2rem auto;
+
+        }
+
+
+        /* Seção de Destaques/Projetos */
+
+        .content-section {
+
+            text-align: left;
+
+            margin-top: 2.5rem;
+
+            border-top: 1px solid var(--borda);
+
+            padding-top: 2rem;
+
+        }
+
+
+        .content-section h2 {
+
+            font-size: 1.3rem;
+
+            margin-bottom: 1rem;
+
+        }
+
+
+        .info-box {
+
+            background-color: var(--cor-fundo);
+
+            padding: 1.25rem;
+
+            border-radius: 8px;
+
+            margin-bottom: 1rem;
+
+            border-left: 4px solid var(--cor-primaria);
+
+        }
+
+
+        /* =========================================================
+
+           RODAPÉ
+
+        ========================================================= */
+
+        footer {
+
+            background-color: var(--cor-card);
+
+            border-top: 1px solid var(--borda);
+
+            text-align: center;
+
+            padding: 1.5rem;
+
+            font-size: 0.9rem;
+
+            color: var(--cor-texto-suave);
+
+        }
+
+
+        footer a {
+
+            color: var(--cor-primaria);
+
+            text-decoration: none;
+
+        }
+
+
+        footer a:hover {
+
+            text-decoration: underline;
+
+        }
+
+    </style>
+
 </head>
+
 <body>
 
-  <!-- Overlay para fechar ao clicar fora -->
-  <div id="overlay" class="overlay"></div>
 
-  <div class="container">
-    <div class="header-actions">
-      <h1>Calculadora de IMC</h1>
-      <button id="btn-open-drawer" class="btn-toggle-history">📋 Histórico</button>
-    </div>
-    
-    <form id="imc-form">
-      <div class="form-group">
-        <label for="nome">Nome:</label>
-        <input type="text" id="nome" placeholder="Digite seu nome" required>
-      </div>
-      <div class="form-group">
-        <label for="peso">Peso (kg):</label>
-        <input type="number" id="peso" step="0.1" min="1" placeholder="Ex: 75.5" required>
-      </div>
-      <div class="form-group">
-        <label for="altura">Altura (m):</label>
-        <input type="number" id="altura" step="0.01" min="0.5" max="2.5" placeholder="Ex: 1.75" required>
-      </div>
-      <button type="submit" class="btn-calc">Calcular e Salvar</button>
-    </form>
+    <!-- =========================================================
 
-    <div id="result" class="result"></div>
-  </div>
+         1. CABEÇALHO / NAVEGAÇÃO
 
-  <!-- Aba Retrátil (Drawer) -->
-  <aside id="drawer" class="drawer">
-    <div class="drawer-header">
-      <h2>Histórico de Registros</h2>
-      <button id="btn-close-drawer" class="btn-close">&times;</button>
-    </div>
-    <div class="drawer-body">
-      <ul id="history-list"></ul>
-    </div>
-    <div class="drawer-footer">
-      <button id="btn-clear-history" class="btn-clear">Limpar Histórico</button>
-    </div>
-  </aside>
+         Para adicionar novas páginas, basta criar novos arquivos .html 
 
-  <script>
-    const form = document.getElementById('imc-form');
-    const resultDiv = document.getElementById('result');
-    const historyList = document.getElementById('history-list');
-    const btnClearHistory = document.getElementById('btn-clear-history');
+         (ex: sobre.html, projetos.html) e adicionar um <li> no menu abaixo.
 
-    // Elementos da Aba Retrátil
-    const drawer = document.getElementById('drawer');
-    const overlay = document.getElementById('overlay');
-    const btnOpenDrawer = document.getElementById('btn-open-drawer');
-    const btnCloseDrawer = document.getElementById('btn-close-drawer');
+    ========================================================= -->
 
-    const STORAGE_KEY = 'imc_historico_v1';
+    <header>
 
-    // Controle de abertura/fechamento do Drawer
-    function openDrawer() {
-      drawer.classList.add('open');
-      overlay.classList.add('active');
-    }
+        <nav class="navbar">
 
-    function closeDrawer() {
-      drawer.classList.remove('open');
-      overlay.classList.remove('active');
-    }
+            <a href="index.html" class="nav-logo">Meu Site</a>
 
-    btnOpenDrawer.addEventListener('click', openDrawer);
-    btnCloseDrawer.addEventListener('click', closeDrawer);
-    overlay.addEventListener('click', closeDrawer);
+            
 
-    // Inicialização
-    document.addEventListener('DOMContentLoaded', renderHistory);
+            <ul class="nav-links">
 
-    // Manipulador de envio do formulário
-    form.addEventListener('submit', function(e) {
-      e.preventDefault();
+                <li><a href="index.html" class="active">Início</a></li>
 
-      const nome = document.getElementById('nome').value.trim();
-      const peso = parseFloat(document.getElementById('peso').value);
-      const altura = parseFloat(document.getElementById('altura').value);
+                
 
-      if (!nome || isNaN(peso) || isNaN(altura) || altura <= 0) return;
+                <!-- ALUNO: Descomente ou duplique as linhas abaixo quando criar novas páginas -->
 
-      const imc = peso / (altura * altura);
-      const classificacao = getClassificacao(imc);
+                <!-- <li><a href="sobre.html">Sobre Mim</a></li> -->
 
-      displayResult(imc, classificacao.texto, classificacao.classeCss);
+                <!-- <li><a href="projetos.html">Projetos</a></li> -->
 
-      const registro = {
-        id: Date.now(),
-        data: new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-        nome,
-        peso,
-        altura,
-        imc: imc.toFixed(2),
-        classificacao: classificacao.texto
-      };
+                <!-- <li><a href="contato.html">Contato</a></li> -->
 
-      saveRecord(registro);
-      renderHistory();
-      form.reset();
-    });
+            </ul>
 
-    function getClassificacao(imc) {
-      if (imc < 18.5) return { texto: 'Abaixo do peso', classeCss: 'abaixo' };
-      if (imc < 24.9) return { texto: 'Peso normal', classeCss: 'normal' };
-      if (imc < 29.9) return { texto: 'Sobrepeso', classeCss: 'sobrepeso' };
-      return { texto: 'Obesidade', classeCss: 'obesidade' };
-    }
+        </nav>
 
-    function displayResult(imc, classificacao, classeCss) {
-      resultDiv.className = `result ${classeCss}`;
-      resultDiv.style.display = 'block';
-      resultDiv.innerHTML = `Seu IMC é <strong>${imc.toFixed(2)}</strong> (${classificacao})`;
-    }
+    </header>
 
-    function getRecords() {
-      const records = localStorage.getItem(STORAGE_KEY);
-      return records ? JSON.parse(records) : [];
-    }
 
-    function saveRecord(record) {
-      const records = getRecords();
-      records.unshift(record);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
-    }
+    <!-- =========================================================
 
-    function renderHistory() {
-      const records = getRecords();
-      historyList.innerHTML = '';
+         2. CONTEÚDO PRINCIPAL
 
-      if (records.length === 0) {
-        historyList.innerHTML = '<li style="justify-content:center; color:#888;">Nenhum registro no histórico.</li>';
-        return;
-      }
+    ========================================================= -->
 
-      records.forEach(rec => {
-        const li = document.createElement('li');
-        li.innerHTML = `
-          <div>
-            <strong>${rec.nome}</strong><br>
-            <small style="color:#666">${rec.data}</small><br>
-            <small>${rec.peso} kg | ${rec.altura} m</small>
-          </div>
-          <div style="text-align: right;">
-            <strong style="font-size: 16px;">${rec.imc}</strong><br>
-            <small>${rec.classificacao}</small>
-          </div>
-        `;
-        historyList.appendChild(li);
-      });
-    }
+    <main>
 
-    btnClearHistory.addEventListener('click', () => {
-      if (confirm('Deseja realmente apagar todo o histórico?')) {
-        localStorage.removeItem(STORAGE_KEY);
-        renderHistory();
-      }
-    });
-  </script>
+        <div class="profile-card">
+
+            
+
+            <!-- ALUNO: Substitua o 'src' pelo caminho da sua imagem (ex: foto.jpg ou uma URL da web) -->
+
+            <div class="profile-image-container">
+
+                <img 
+
+                    src="https://via.placeholder.com/160" 
+
+                    alt="Foto de Perfil do Aluno" 
+
+                    class="profile-image"
+
+                >
+
+            </div>
+
+
+            <!-- ALUNO: Altere para o seu nome e profissão/estudo -->
+
+            <h1 class="student-name">Seu Nome Aqui</h1>
+
+            <p class="student-role">Estudante de Informática / Programador Iniciante</p>
+
+            
+
+            <!-- ALUNO: Escreva um pequeno resumo sobre você -->
+
+            <p class="student-bio">
+
+                Bem-vindo ao meu site pessoal! Aqui compartilho meus projetos, 
+
+                estudos e o que venho aprendendo em desenvolvimento web e tecnologia.
+
+            </p>
+
+
+            <!-- Seção de informações adicionais -->
+
+            <section class="content-section">
+
+                <h2>Meus Interesses & Habilidades</h2>
+
+                
+
+                <div class="info-box">
+
+                    <strong>Tecnologias que estou aprendendo:</strong>
+
+                    <p>HTML5, CSS3, JavaScript, Git & GitHub</p>
+
+                </div>
+
+
+                <div class="info-box">
+
+                    <strong>Sobre meus projetos:</strong>
+
+                    <p>Este site foi desenvolvido e hospedado gratuitamente usando o GitHub Pages durante as aulas práticas.</p>
+
+                </div>
+
+            </section>
+
+
+        </div>
+
+    </main>
+
+
+    <!-- =========================================================
+
+         3. RODAPÉ
+
+    ========================================================= -->
+
+    <footer>
+
+        <p>&copy; 2026 - Desenvolvido por <strong>Seu Nome Aqui</strong></p>
+
+        <p>Hospedado no <a href="https://pages.github.com/" target="_blank">GitHub Pages</a></p>
+
+    </footer>
+
+
 </body>
+
 </html>
